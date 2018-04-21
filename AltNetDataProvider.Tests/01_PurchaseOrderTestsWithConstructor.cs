@@ -13,7 +13,7 @@ namespace AltNetDataProvider.Tests
         public void SimpleConstruction()
         {
             var po = new PurchaseOrder(
-                new Customer("123", "Celia Smith"),
+                new Customer("123", "Celia Smith", CustomerCategory.Normal),
                 "PO333",
                 DateTime.Today.AddDays(7),
                 new[]
@@ -36,9 +36,31 @@ namespace AltNetDataProvider.Tests
         [Test]
         public void Cannot_RequestDeliveryInThePast()
         {
-            Assert.Throws<ArgumentException>(() => new TestObjectBuilder<PurchaseOrder>()
-                .SetArgument(o => o.RequiredDeliveryDate, DateTime.Today.AddDays(-1))
-                .Build());
+            Assert.Throws<ArgumentException>(() => new PurchaseOrder(
+                new Customer("123", "Celia Smith", CustomerCategory.Normal),
+                "PO333",
+                DateTime.Today.AddDays(-7),
+                new[]
+                {
+                    new PurchaseOrderLine(
+                        new Item("Item123", "Chair", 123, 456, new Money("USD", 100.0m)),
+                        10)
+                }));
+        }
+
+        [Test]
+        public void VipCustomer_CanRequestDeliveryInThePast()
+        {
+            Assert.DoesNotThrow(() => new PurchaseOrder(
+                new Customer("123", "Celia Smith", CustomerCategory.Vip),
+                "PO333",
+                DateTime.Today.AddDays(-7),
+                new[]
+                {
+                    new PurchaseOrderLine(
+                        new Item("Item123", "Chair", 123, 456, new Money("USD", 100.0m)),
+                        10)
+                }));
         }
     }
 }

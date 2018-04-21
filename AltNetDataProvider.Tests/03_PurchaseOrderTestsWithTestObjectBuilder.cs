@@ -42,7 +42,7 @@ namespace AltNetDataProvider.Tests
         }
 
         [Test]
-        public void VipCustomer_CannotRequestDeliveryInThePast()
+        public void VipCustomer_CanRequestDeliveryInThePast()
         {
             var customer = new CustomerBuilder()
                 .SetCategory(CustomerCategory.Vip)
