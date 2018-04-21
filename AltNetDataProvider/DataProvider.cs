@@ -9,39 +9,17 @@ namespace AltNetDataProvider
 {
     public static class DataProvider
 	{
-		public static T Get<T>(params ProviderOverride[] providers)
+		public static T Get<T>()
 		{
-			return (T)Get(typeof (T), providers);
+			return (T)Get(typeof (T));
+		}
+        
+		public static object Get(Type type)
+		{
+			return Get(type, true);
 		}
 
-		public static T GetNotMatching<T>(params T[] values)
-		{
-			const int maxAttempts = 10;
-			for (int i = 0; i < maxAttempts; i++)
-			{
-				var attempt = Get<T>();
-				if (!values.Contains(attempt))
-				{
-					return attempt;
-				}
-			}
-			throw new Exception($"DataProvider GetNotMatching <{typeof(T)}> failed to provide with maximum number of attempts");
-		}
-
-		public static T[] GetArray<T>(int size = DefaultArrayLength)
-		{
-			return (T[]) AnArrayOfType(typeof (T), size);
-		}
-
-		public static object Get(Type type, IEnumerable<ProviderOverride> providers)
-		{
-			providers.ToList().ForEach(p => _providers[p.Type] = p.Provider);
-			object value = Get(type, true);
-			RestoreDefaultProviders();
-			return value;
-		}
-
-		public static object Get(Type t, bool allowSetProperties = false)
+		public static object Get(Type t, bool allowSetProperties)
 		{
 		    var nullable = Nullable.GetUnderlyingType(t);
 
@@ -93,15 +71,15 @@ namespace AltNetDataProvider
 				                          || type.GetGenericTypeDefinition() == typeof (Dictionary<,>);
 				if (isGenericDictionary)
 				{
-					Type[] typeArguments = type.GetGenericArguments();
-					Type openGenericDictionary = typeof (Dictionary<,>);
-					Type actualDictionaryType = openGenericDictionary.MakeGenericType(typeArguments);
+					var typeArguments = type.GetGenericArguments();
+					var openGenericDictionary = typeof (Dictionary<,>);
+					var actualDictionaryType = openGenericDictionary.MakeGenericType(typeArguments);
 					var emptyConstructor = actualDictionaryType.GetConstructor(new Type[0]);
 				    if (emptyConstructor != null)
 				    {
                         var dictionary = (IDictionary)emptyConstructor.Invoke(new object[0]);
-                        object key = Get(typeArguments[0]);
-				        object value = Get(typeArguments[1]);
+                        var key = Get(typeArguments[0]);
+				        var value = Get(typeArguments[1]);
                         dictionary.Add(key, value);
 
 				        return dictionary;
@@ -174,12 +152,11 @@ namespace AltNetDataProvider
 
 		private static object[] GetMethodParametersArray(ConstructorInfo constructorWithMostParameters)
 		{
-			var parameters = constructorWithMostParameters
+			return constructorWithMostParameters
 				.GetParameters()
 				.Select(x => x.ParameterType)
-				.Select(x => Get(x))
+				.Select(Get)
 				.ToArray();
-			return parameters;
 		}
 
 		static DataProvider()
@@ -222,9 +199,9 @@ namespace AltNetDataProvider
 		public static string GetStringLike(string mask)
 		{
 			var b = new StringBuilder();
-			foreach (char c in mask)
+			foreach (var c in mask)
 			{
-				char nextChar = GetNextMaskedChar(c);
+				var nextChar = GetNextMaskedChar(c);
 				b.Append(nextChar);
 			}
 			return b.ToString();
@@ -234,23 +211,15 @@ namespace AltNetDataProvider
 		{
 			return _providers.ContainsKey(type);
 		}
-
-		public static T Create<T>()
-		{
-			if (typeof(T).IsEnum)
-				return RandomEnum<T>();
-			var provider = _providers[typeof (T)];
-			return (T) provider();
-		}
-
+        
 	    private static readonly IDictionary<Type, Func<object>> CustomProviders = new Dictionary<Type, Func<object>>();
 
 	    public static void RegisterCustomProviders(IDictionary<Type, Func<object>> customProviders)
 	    {
 	        foreach (var provider in customProviders)
 	        {
-                _providers.Add(provider);
-	            CustomProviders.Add(provider);
+                _providers[provider.Key] = provider.Value;
+	            CustomProviders[provider.Key] = provider.Value;
 	        }
 	    }
 
@@ -260,7 +229,7 @@ namespace AltNetDataProvider
 			_providers = new Dictionary<Type, Func<object>>(DefaultProviders);
 		    foreach (var provider in CustomProviders)
 		    {
-		        _providers.Add(provider);
+		        _providers[provider.Key] = provider.Value;
 		    }
 		}
 
@@ -319,42 +288,35 @@ namespace AltNetDataProvider
 
         public static DateTime RandomDateWithinGivenDaysFromToday(uint plusMinusDays, DateTimeKind kind = DateTimeKind.Unspecified)
 	    {
-            int hours = Random.Next(0, 23);
-            int minutes = Random.Next(0, 59);
-            int seconds = Random.Next(0, 59);
+            var hours = Random.Next(0, 23);
+            var minutes = Random.Next(0, 59);
+            var seconds = Random.Next(0, 59);
 
             var now = kind == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now;
 
             var randomDate = new DateTime(now.Year, now.Month, now.Day, hours, minutes, seconds, kind);
 
-            int randomInt = Random.Next((int) (-1*plusMinusDays), (int) plusMinusDays);
+            var randomInt = Random.Next((int) (-1*plusMinusDays), (int) plusMinusDays);
 
             return randomDate.AddDays(randomInt);
 	    }
 
 		private static object RandomDateTimeOffset()
 		{
-			int hours = Random.Next(0, 23);
-			int minutes = Random.Next(0, 59);
-			int seconds = Random.Next(0, 59);
+			var hours = Random.Next(0, 23);
+			var minutes = Random.Next(0, 59);
+			var seconds = Random.Next(0, 59);
 
-			int randomMonth = Random.Next(1, 12);
-			int randomDay = Random.Next(1, 28);
+			var randomMonth = Random.Next(1, 12);
+			var randomDay = Random.Next(1, 28);
 
-			int thisYear = DateTime.Today.Year;
+			var thisYear = DateTime.Today.Year;
 
 			var randomDate = new DateTimeOffset(thisYear, randomMonth, randomDay, hours, minutes, seconds, TimeSpan.Zero);
 
-			int randomInt = Random.Next(-1000, 1000);
+			var randomInt = Random.Next(-1000, 1000);
 
 			return randomDate.AddDays(randomInt);
-		}
-        
-		private static T RandomEnum<T>()
-		{
-			Array allValues = Enum.GetValues(typeof(T));
-			int randomIndex = Random.Next(0, allValues.Length);
-			return (T)allValues.GetValue(randomIndex);
 		}
 
 		private static object RandomDouble()
@@ -364,8 +326,8 @@ namespace AltNetDataProvider
 
 		private static object RandomEnum(Type t)
 		{
-			Array allValues = Enum.GetValues(t);
-			int randomIndex = Random.Next(0, allValues.Length);
+			var allValues = Enum.GetValues(t);
+			var randomIndex = Random.Next(0, allValues.Length);
 			return allValues.GetValue(randomIndex);
 		}
         
@@ -384,12 +346,11 @@ namespace AltNetDataProvider
 			return _nextDecimal;
 		}
 
-       	private static Byte _nextByte = 1;
+       	private static byte _nextByte = 1;
 		private static object NextByte()
 		{
 			return _nextByte++;
 		}
-
 		
 		private static int _nextStringNumber = 1;
 		private const int DefaultArrayLength = 2;
@@ -402,7 +363,7 @@ namespace AltNetDataProvider
         private static int _nextCharNumber = 1;
         private static object NextChar()
         {
-            int num = ++_nextCharNumber;
+            var num = ++_nextCharNumber;
             if (_nextCharNumber == 25) _nextCharNumber = 0;
             return (char)('a' + num);
         }
@@ -411,9 +372,9 @@ namespace AltNetDataProvider
 		{
 			if (length < 0) throw new ArgumentException("length must be zero or greater", nameof(length));
 			var builder = new StringBuilder();
-			for (int i = 0; i < length; i++)
+			for (var i = 0; i < length; i++)
 			{
-				char ch = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * Random.NextDouble() + 65)));
+				var ch = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * Random.NextDouble() + 65)));
 				builder.Append(ch);
 			}
 
