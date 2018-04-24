@@ -35,8 +35,7 @@ namespace AltNetDataProvider.Tests
                 .Build();
 
             Assert.Throws<ArgumentException>(() => new TestObjectBuilder<PurchaseOrder>()
-                .SetArgument(o => o.Customer,
-                    customer)
+                .SetArgument(o => o.Customer, customer)
                 .SetArgument(o => o.RequiredDeliveryDate, DateTime.Today.AddDays(-1))
                 .Build());
         }
@@ -49,8 +48,7 @@ namespace AltNetDataProvider.Tests
                 .Build();
 
             Assert.DoesNotThrow(() => new TestObjectBuilder<PurchaseOrder>()
-                .SetArgument(o => o.Customer,
-                    customer)
+                .SetArgument(o => o.Customer, customer)
                 .SetArgument(o => o.RequiredDeliveryDate, DateTime.Today.AddDays(-1))
                 .Build());
         }
@@ -63,10 +61,12 @@ namespace AltNetDataProvider.Tests
                 .Build();
             po.Should().NotBeNull();
 
-            var po2 = new TestObjectBuilder<PurchaseOrder>().Clone(po).Build();
+            var po2 = new TestObjectBuilder<PurchaseOrder>().Clone(po)
+                .SetArgument(o => o.RequiredDeliveryDate, po.RequiredDeliveryDate?.AddDays(-2))
+                .Build();
             po2.Customer.Should().BeEquivalentTo(po.Customer);
             po2.OrderNumber.Should().Be(po.OrderNumber);
-            po2.RequiredDeliveryDate.Should().Be(po.RequiredDeliveryDate);
+            po2.RequiredDeliveryDate.Should().Be(po.RequiredDeliveryDate?.AddDays(-2));
         }
     }
 }

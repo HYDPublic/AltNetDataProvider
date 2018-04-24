@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AltNetDataProvider", "AltNetDataProvider\AltNetDataProvider.csproj", "{73A30298-C6BF-4BF3-A28C-C0D6B7834A5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AltNetDataProvider", "AltNetDataProvider\AltNetDataProvider.csproj", "{73A30298-C6BF-4BF3-A28C-C0D6B7834A5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AltNetDataProvider.Tests", "AltNetDataProvider.Tests\AltNetDataProvider.Tests.csproj", "{6D2B852E-917E-4B0C-99EA-92024C35B5FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AltNetDataProvider.Tests", "AltNetDataProvider.Tests\AltNetDataProvider.Tests.csproj", "{6D2B852E-917E-4B0C-99EA-92024C35B5FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AltNetDataProvider.Domain", "AltNetDataProvider.Domain\AltNetDataProvider.Domain.csproj", "{6F534CFC-8901-4071-9D59-EB48AED65C79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AltNetDataProvider.Domain", "AltNetDataProvider.Domain\AltNetDataProvider.Domain.csproj", "{6F534CFC-8901-4071-9D59-EB48AED65C79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +30,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D4B25189-9018-463E-A51C-3D22D6D8C5F1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D4B25189-9018-463E-A51C-3D22D6D8C5F1}
